@@ -108,9 +108,15 @@ func auth_response(success: bool, msg: String):
 		contact_list.add_item("AI") # 新增AI聊天
 		contact_list.select(0) # 默认选中第一项（公共大厅）
 		chat_histories = {"": "", "AI": ""}
+		unread_channels.clear()
+		contact_update_times.clear()
 		current_receiver = ""
 		current_mode = ChatMode.PUBLIC
 		_update_chat_ui()
+		
+		# 启动一个定时器，在稍微延迟后把所有频道标记为已读（模拟全都点一遍）
+		var timer = get_tree().create_timer(0.1)
+		timer.timeout.connect(_mark_all_as_read)
 	else:
 		# 登录失败，显示错误信息
 		status_label.text = "失败: " + msg
@@ -272,6 +278,11 @@ func _on_contact_selected(index: int):
 	
 	# 刷新聊天区显示的内容
 	_update_chat_ui()
+
+# 标记所有频道为已读（模拟把所有窗口点了一遍）
+func _mark_all_as_read():
+	for channel in chat_histories.keys():
+		unread_channels[channel] = false
 
 # 更新聊天区域显示
 func _update_chat_ui():

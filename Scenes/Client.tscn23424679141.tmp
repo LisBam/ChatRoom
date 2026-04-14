@@ -1,0 +1,142 @@
+[gd_scene format=3 uid="uid://c0h6i2onrvkif"]
+
+[ext_resource type="Script" uid="uid://cg0jxe2s0s207" path="res://Scripts/Client.gd" id="1_client"]
+
+[node name="App" type="Control" unique_id=1521240720]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_client")
+
+[node name="LoginPanel" type="Panel" parent="." unique_id=2074223889]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -200.0
+offset_right = 150.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="LoginPanel" unique_id=1632329868]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="Label" type="Label" parent="LoginPanel/VBox" unique_id=1336176156]
+layout_mode = 2
+text = "在线聊天室 登录"
+horizontal_alignment = 1
+
+[node name="UserInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=741530736]
+layout_mode = 2
+placeholder_text = "用户名"
+
+[node name="PwdInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=1755152921]
+layout_mode = 2
+placeholder_text = "密码"
+secret = true
+
+[node name="EmailInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=774965565]
+layout_mode = 2
+placeholder_text = "邮箱 (仅限注册需要)"
+
+[node name="LoginBtn" type="Button" parent="LoginPanel/VBox" unique_id=971438676]
+layout_mode = 2
+text = "登录"
+
+[node name="RegisterBtn" type="Button" parent="LoginPanel/VBox" unique_id=216842122]
+layout_mode = 2
+text = "注册"
+
+[node name="ChatPanel" type="Panel" parent="." unique_id=512786028]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ChatLayout" type="HBoxContainer" parent="ChatPanel" unique_id=317164890]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Sidebar" type="VBoxContainer" parent="ChatPanel/ChatLayout" unique_id=890007172]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+
+[node name="ContactList" type="ItemList" parent="ChatPanel/ChatLayout/Sidebar" unique_id=18420880]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AddContactBox" type="HBoxContainer" parent="ChatPanel/ChatLayout/Sidebar" unique_id=41886113]
+layout_mode = 2
+
+[node name="NewContactInput" type="LineEdit" parent="ChatPanel/ChatLayout/Sidebar/AddContactBox" unique_id=498271059]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "添加联系人..."
+
+[node name="AddContactBtn" type="Button" parent="ChatPanel/ChatLayout/Sidebar/AddContactBox" unique_id=800062642]
+layout_mode = 2
+text = "+"
+
+[node name="ChatArea" type="VBoxContainer" parent="ChatPanel/ChatLayout" unique_id=1385246214]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CurrentChatLabel" type="Label" parent="ChatPanel/ChatLayout/ChatArea" unique_id=1434700021]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "公共大厅"
+horizontal_alignment = 1
+
+[node name="HistoryText" type="RichTextLabel" parent="ChatPanel/ChatLayout/ChatArea" unique_id=1208583161]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+scroll_following = true
+
+[node name="InputLayout" type="HBoxContainer" parent="ChatPanel/ChatLayout/ChatArea" unique_id=838921243]
+layout_mode = 2
+
+[node name="MessageInput" type="LineEdit" parent="ChatPanel/ChatLayout/ChatArea/InputLayout" unique_id=98539092]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "输入消息..."
+
+[node name="SendBtn" type="Button" parent="ChatPanel/ChatLayout/ChatArea/InputLayout" unique_id=1902942884]
+layout_mode = 2
+text = "发送"
+
+[connection signal="pressed" from="LoginPanel/VBox/LoginBtn" to="." method="_on_login_pressed"]
+[connection signal="pressed" from="LoginPanel/VBox/RegisterBtn" to="." method="_on_register_pressed"]
+[connection signal="item_selected" from="ChatPanel/ChatLayout/Sidebar/ContactList" to="." method="_on_contact_selected"]
+[connection signal="pressed" from="ChatPanel/ChatLayout/Sidebar/AddContactBox/AddContactBtn" to="." method="_on_add_contact_pressed"]
+[connection signal="pressed" from="ChatPanel/ChatLayout/ChatArea/InputLayout/SendBtn" to="." method="_on_send_pressed"]
