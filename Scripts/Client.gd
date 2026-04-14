@@ -22,6 +22,7 @@ var chat_histories = {"": ""}
 @onready var current_chat_label = $ChatPanel/ChatLayout/ChatArea/CurrentChatLabel # 当前聊天频道名称
 @onready var chat_history = $ChatPanel/ChatLayout/ChatArea/HistoryText # 聊天记录文本框
 @onready var message_input = $ChatPanel/ChatLayout/ChatArea/InputLayout/MessageInput # 消息输入框
+@onready var send_btn = $ChatPanel/ChatLayout/ChatArea/InputLayout/SendBtn # 发送按钮
 @onready var usr_input = $LoginPanel/VBox/UserInput # 用户名输入框
 @onready var pwd_input = $LoginPanel/VBox/PwdInput # 密码输入框
 @onready var email_input = $LoginPanel/VBox/EmailInput # 邮箱输入框
@@ -46,6 +47,10 @@ func _ready():
     
     # 绑定回车键发送消息
     message_input.text_submitted.connect(_on_message_input_text_submitted)
+    # 回车提交后继续保持编辑状态（关键：避免看似有焦点却不能继续输入）
+    message_input.keep_editing_on_text_submit = true
+    # 防止点击发送按钮后按钮抢走键盘焦点
+    send_btn.focus_mode = Control.FOCUS_NONE
 
 # 连接服务器成功时的回调
 func _on_connected():
@@ -119,11 +124,15 @@ func _on_send_pressed():
     
     # 在本地聊天记录中追加自己发送的消息
     _append_chat_history(target, "[You]: " + content)
-    message_input.text = "" # 清空输入框
+    message_input.clear() # 清空输入框并重置内部编辑状态
+    message_input.caret_column = 0
+    # 延迟到当前 UI 事件结束后恢复可输入焦点
+    message_input.call_deferred("grab_focus")
 
 # 输入框按下回车时的回调
 func _on_message_input_text_submitted(_new_text: String):
-    _on_send_pressed()
+    # 延迟调用，避免与 LineEdit 的提交事件同帧冲突
+    call_deferred("_on_send_pressed")
 
 # 接收别人发来的消息
 @rpc("any_peer", "call_remote")
