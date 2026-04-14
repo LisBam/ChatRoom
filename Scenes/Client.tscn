@@ -1,0 +1,115 @@
+[gd_scene format=3 uid="uid://c0h6i2onrvkif"]
+
+[ext_resource type="Script" uid="uid://cg0jxe2s0s207" path="res://Scripts/Client.gd" id="1_client"]
+
+[node name="App" type="Control" unique_id=1521240720]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_client")
+
+[node name="LoginPanel" type="Panel" parent="." unique_id=2074223889]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -200.0
+offset_right = 150.0
+offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="LoginPanel" unique_id=1632329868]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+alignment = 1
+
+[node name="Label" type="Label" parent="LoginPanel/VBox" unique_id=1336176156]
+layout_mode = 2
+text = "Chat Room Login"
+horizontal_alignment = 1
+
+[node name="UserInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=741530736]
+layout_mode = 2
+placeholder_text = "Username"
+
+[node name="PwdInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=1755152921]
+layout_mode = 2
+placeholder_text = "Password"
+secret = true
+
+[node name="EmailInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=774965565]
+layout_mode = 2
+placeholder_text = "Email (Register only)"
+
+[node name="LoginBtn" type="Button" parent="LoginPanel/VBox" unique_id=971438676]
+layout_mode = 2
+text = "Login"
+
+[node name="RegisterBtn" type="Button" parent="LoginPanel/VBox" unique_id=216842122]
+layout_mode = 2
+text = "Register"
+
+[node name="ChatPanel" type="Panel" parent="." unique_id=512786028]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ChatPanel" unique_id=642723402]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HistoryText" type="TextEdit" parent="ChatPanel/VBoxContainer" unique_id=168680882]
+layout_mode = 2
+size_flags_vertical = 3
+editable = false
+wrap_mode = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ChatPanel/VBoxContainer" unique_id=571990350]
+layout_mode = 2
+
+[node name="TargetInput" type="LineEdit" parent="ChatPanel/VBoxContainer/HBoxContainer" unique_id=1401142922]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+placeholder_text = "Private to... (Empty = All)"
+
+[node name="MessageInput" type="LineEdit" parent="ChatPanel/VBoxContainer/HBoxContainer" unique_id=1504437435]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Enter a message..."
+
+[node name="SendBtn" type="Button" parent="ChatPanel/VBoxContainer/HBoxContainer" unique_id=1202375703]
+layout_mode = 2
+text = "Send"
+
+[connection signal="pressed" from="LoginPanel/VBox/LoginBtn" to="." method="_on_login_pressed"]
+[connection signal="pressed" from="LoginPanel/VBox/RegisterBtn" to="." method="_on_register_pressed"]
+[connection signal="pressed" from="ChatPanel/VBoxContainer/HBoxContainer/SendBtn" to="." method="_on_send_pressed"]
