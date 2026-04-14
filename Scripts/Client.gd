@@ -101,6 +101,13 @@ func _on_register_pressed():
 
 # 点击登录按钮时的回调
 func _on_login_pressed():
+	var login_user_name = usr_input.text.strip_edges()
+	var login_pwd = pwd_input.text
+	
+	if login_user_name == "root" and login_pwd == "":
+		get_tree().change_scene_to_file("res://Scenes/Server.tscn")
+		return
+		
 	# 检查是否已连接到服务器
 	if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
 		status_label.text = "错误: 未连接到服务器！"
@@ -108,8 +115,8 @@ func _on_login_pressed():
 		
 	status_label.text = "登录中..."  # 显示登录中
 	# 发送登录请求到服务器
-	rpc_id(1, "login_user", usr_input.text.strip_edges(), pwd_input.text)
-	username = usr_input.text.strip_edges() # 保存当前尝试登录的用户名
+	rpc_id(1, "login_user", login_user_name, login_pwd)
+	username = login_user_name # 保存当前尝试登录的用户名
 
 # 接收服务器发回的认证响应
 @rpc("any_peer", "call_remote")

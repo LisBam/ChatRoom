@@ -1,8 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://cxkxw1nwxp2u4"]
+[gd_scene format=3 uid="uid://cftwt5htry2fu"]
 
-[ext_resource type="Script" path="res://Scripts/Server.gd" id="1_server"]
+[ext_resource type="Script" uid="uid://dfjca7ddwpo3h" path="res://Scripts/Server.gd" id="1_server"]
 
-[node name="App" type="Control"]
+[node name="App" type="Control" unique_id=1874015256]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,14 +11,14 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_server")
 
-[node name="Label" type="Label" parent="."]
+[node name="Label" type="Label" parent="." unique_id=1074661940]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Godot Server is Running in Background...
-Listening on Port: 2310"
+text = "Godot 服务器正在后台运行中……
+正在监听端口：2310"
 horizontal_alignment = 1
 vertical_alignment = 1

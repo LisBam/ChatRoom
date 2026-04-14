@@ -1,5 +1,5 @@
 [application]
-run/main_scene="res://Scenes/Main.tscn" 
+run/main_scene="res://Scenes/Client.tscn" 
 
 [autoload]
 
