@@ -82,14 +82,15 @@ func login_user(username, password):
         user_clients[username] = client_id
         rpc_id(client_id, "auth_response", true, "Login successful") # 通知客户端登录成功
         
-        # 向后台请求聊天记录
+        # 向后台请求���天记录
         var history_response = await _send_http_request("get_history", {"username": username})
         if history_response.get("success", false):
             var history = history_response.get("history", [])
             for msg in history:
-                # 判断是否是私聊，并将历史消息下发给该客户端
+                # 判断是否是私聊
                 var is_private = msg.receiver != ""
-                rpc_id(client_id, "receive_message", msg.sender, msg.content, msg.type, is_private)
+                # 把 sender 和 receiver 都传过去，方便客户端正确归类历史信息
+                rpc_id(client_id, "receive_message", msg.sender, msg.receiver, msg.content, msg.type, is_private)
     else:
         # 登录失败，通知客户端
         rpc_id(client_id, "auth_response", false, response.get("msg", "Login failed"))
@@ -107,15 +108,15 @@ func send_message(content, type, target):
     if target == "": # 如果目标为空，视为公共消息（广播）
         for client in connected_users.keys():
             if client != sender_id: # 不要发给自己
-                rpc_id(client, "receive_message", sender_name, content, type, false)
+                rpc_id(client, "receive_message", sender_name, "", content, type, false)
     else: # 否则是私下发送（私聊）
         if user_clients.has(target):
             # 发送给指定的用户
-            rpc_id(user_clients[target], "receive_message", sender_name, content, type, true)
+            rpc_id(user_clients[target], "receive_message", sender_name, target, content, type, true)
             rpc_id(sender_id, "update_status", "read") # 假设发过去以后算作已读
 
 # --- RPC STUBS FOR CLIENT ---
 # 这些是客户端接收函数的存根，为了让服务器通过 rpc_id 能够查找到相应的方法名
 @rpc("any_peer", "call_remote") func auth_response(_success, _msg): pass # 认证响应
-@rpc("any_peer", "call_remote") func receive_message(_sender, _content, _type, _is_private): pass # 接收消息
+@rpc("any_peer", "call_remote") func receive_message(_sender, _receiver, _content, _type, _is_private): pass # 接收消息
 @rpc("any_peer", "call_remote") func update_status(_status): pass # 更新发送状态
