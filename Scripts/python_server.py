@@ -75,7 +75,7 @@ def login():
         if user:
             return jsonify({'success': True, 'msg': '登录成功', 'user_id': user['id']}) # 登录成功返回 user_id
         else:
-            return jsonify({'success': False, 'msg': '用户名或密码无效'}) # 信息不匹配
+            return jsonify({'success': False, 'msg': '用户名或密码错误'}) # 信息不匹配
     except Exception as e:
         return jsonify({'success': False, 'msg': str(e)}) # 发生异常
     finally:
@@ -109,7 +109,7 @@ def save_message():
             receiver = cursor.fetchone()
             if receiver:
                 receiver_id = receiver['id']
-        
+
         # 确保发送者存在
         if not sender_id:
             return jsonify({'success': False, 'msg': '未找到发送者'})
