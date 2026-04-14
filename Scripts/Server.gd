@@ -13,7 +13,7 @@ func _ready():
     multiplayer.multiplayer_peer = peer # 设置当前网络节点为服务器节点
     multiplayer.peer_connected.connect(_on_peer_connected) # 连接客户端接入的信号
     multiplayer.peer_disconnected.connect(_on_peer_disconnected) # 连接客户端断开的信号
-    print("Server started on port ", PORT)
+    print("服务器已启动，监听端口：", PORT)
 
 # 辅助函数：发送异步 HTTP 请求给 Python 后端
 func _send_http_request(endpoint: String, payload: Dictionary) -> Dictionary:
@@ -43,7 +43,7 @@ func _send_http_request(endpoint: String, payload: Dictionary) -> Dictionary:
 
 # 当有客户端连接时回调
 func _on_peer_connected(id):
-    print("Peer connected: ", id)
+    print("客户端已连接: ", id)
 
 # 当有客户端断开连接时回调
 func _on_peer_disconnected(id):
@@ -52,7 +52,7 @@ func _on_peer_disconnected(id):
         var uname = connected_users[id]
         user_clients.erase(uname)
         connected_users.erase(id)
-    print("Peer disconnected: ", id)
+    print("客户端已断开连接: ", id)
 
 # 处理客户端的注册请求
 @rpc("any_peer", "call_remote")
@@ -63,10 +63,10 @@ func register_user(username, password, email):
     
     if response.get("success", false):
         # 成功，告诉该客户端并发送认证响应
-        rpc_id(client_id, "auth_response", true, "Register successful")
+        rpc_id(client_id, "auth_response", true, "注册成功")
     else:
         # 失败，发送失败信息
-        var msg = response.get("msg", "Registration failed")
+        var msg = response.get("msg", "注册失败")
         rpc_id(client_id, "auth_response", false, msg)
 
 # 处理客户端的登录请求
@@ -80,9 +80,9 @@ func login_user(username, password):
         # 登录成功，把玩家添加到在线列表
         connected_users[client_id] = username
         user_clients[username] = client_id
-        rpc_id(client_id, "auth_response", true, "Login successful") # 通知客户端登录成功
+        rpc_id(client_id, "auth_response", true, "登录成功") # 通知客户端登录成功
         
-        # 向后台请求���天记录
+        # 向后台请求聊天记录
         var history_response = await _send_http_request("get_history", {"username": username})
         if history_response.get("success", false):
             var history = history_response.get("history", [])
@@ -93,7 +93,7 @@ func login_user(username, password):
                 rpc_id(client_id, "receive_message", msg.sender, msg.receiver, msg.content, msg.type, is_private)
     else:
         # 登录失败，通知客户端
-        rpc_id(client_id, "auth_response", false, response.get("msg", "Login failed"))
+        rpc_id(client_id, "auth_response", false, response.get("msg", "登录失败"))
 
 # 处理客户端的发送消息请求
 @rpc("any_peer", "call_remote")
