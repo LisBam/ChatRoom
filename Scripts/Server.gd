@@ -130,8 +130,8 @@ func save_ai_message(is_user_to_ai: bool, content: String):
 	if not connected_users.has(sender_id): return
 	var username = connected_users[sender_id]
 	
-	var sender = username if is_user_to_ai else "AI"
-	var receiver = "AI" if is_user_to_ai else username
+	var sender = username if is_user_to_ai else "AI助手"
+	var receiver = "AI助手" if is_user_to_ai else username
 	
 	_send_http_request("save_message", {"sender": sender, "receiver": receiver, "content": content, "type": "text"})
 
