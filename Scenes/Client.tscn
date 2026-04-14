@@ -41,29 +41,29 @@ alignment = 1
 
 [node name="Label" type="Label" parent="LoginPanel/VBox" unique_id=1336176156]
 layout_mode = 2
-text = "Chat Room Login"
+text = "在线聊天室 登录"
 horizontal_alignment = 1
 
 [node name="UserInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=741530736]
 layout_mode = 2
-placeholder_text = "Username"
+placeholder_text = "用户名"
 
 [node name="PwdInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=1755152921]
 layout_mode = 2
-placeholder_text = "Password"
+placeholder_text = "密码"
 secret = true
 
 [node name="EmailInput" type="LineEdit" parent="LoginPanel/VBox" unique_id=774965565]
 layout_mode = 2
-placeholder_text = "Email (Register only)"
+placeholder_text = "邮箱 (仅限注册需要)"
 
 [node name="LoginBtn" type="Button" parent="LoginPanel/VBox" unique_id=971438676]
 layout_mode = 2
-text = "Login"
+text = "登录"
 
 [node name="RegisterBtn" type="Button" parent="LoginPanel/VBox" unique_id=216842122]
 layout_mode = 2
-text = "Register"
+text = "注册"
 
 [node name="ChatPanel" type="Panel" parent="." unique_id=512786028]
 visible = false
