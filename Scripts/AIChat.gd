@@ -37,7 +37,7 @@ func send_prompt(prompt: String) -> int:
 			"model": ollama_model,
 			"prompt": prompt,
 			"stream": false, # 禁用流式输出，等待完整回复
-			"system": "你是一个在线聊天室的聊天AI。", # 设定系统提示词
+			"system": "你是一个在线聊天室的聊天AI。这个聊天室的项目是郑力铭制作的。", # 设定系统提示词
 			"options": {
 				"temperature": 1.0, # 每次回答的随机性（0.0为严谨，1.0为发散）
 				"num_predict": 500 # 限制AI最大回复的字数（Token数）
@@ -51,7 +51,7 @@ func send_prompt(prompt: String) -> int:
 		body = {
 			"model": cloud_model,
 			"messages": [
-				{"role": "system", "content": "你是一个在线聊天室的聊天AI。"},
+				{"role": "system", "content": "你是一个在线聊天室的聊天AI。这个聊天室的项目是郑力铭制作的。"},
 				{"role": "user", "content": prompt}
 			],
 			"stream": false,
