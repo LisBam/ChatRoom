@@ -28,16 +28,16 @@ theme_override_constants/separation = 20
 
 [node name="Label" type="Label" parent="VBoxContainer" unique_id=1989472975]
 layout_mode = 2
-text = "Chat Room Application"
+text = "在线聊天室 应用"
 horizontal_alignment = 1
 
 [node name="StartServer" type="Button" parent="VBoxContainer" unique_id=890017695]
 layout_mode = 2
-text = "Start Godot Server"
+text = "启动游戏服务器"
 
 [node name="StartClient" type="Button" parent="VBoxContainer" unique_id=863859957]
 layout_mode = 2
-text = "Start Chat Client"
+text = "启动聊天客户端"
 
 [connection signal="pressed" from="VBoxContainer/StartServer" to="." method="_on_start_server_pressed"]
 [connection signal="pressed" from="VBoxContainer/StartClient" to="." method="_on_start_client_pressed"]
