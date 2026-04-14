@@ -37,7 +37,7 @@ func _ready():
     if err == OK:
         multiplayer.multiplayer_peer = peer # 将当前的网络节点设置为刚才创建的客户端节点
     else:
-        status_label.text = "Error: Cannot start ENet client" # 无法启动客户端时报错
+        status_label.text = "错误: 无法启动 ENet 客户端" # 无法启动客户端时报错
         
     # 连接网络信号以响应连接成功和断开事件
     multiplayer.connected_to_server.connect(_on_connected)
@@ -49,20 +49,20 @@ func _ready():
 
 # 连接服务器成功时的回调
 func _on_connected():
-    status_label.text = "Connected to Server. Please Login."
+    status_label.text = "已连接到服务器，请登录。"
 
 # 连接服务器失败或断开连接时的回调
 func _on_connection_error():
-    status_label.text = "Lost connection to Server!"
+    status_label.text = "与服务器断开连接！"
 
 # 点击注册按钮时的回调
 func _on_register_pressed():
     # 检查是否已连接到服务器
     if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
-        status_label.text = "Error: Not connected to Godot Server!"
+        status_label.text = "错误: 未连接到服务器！"
         return
     
-    status_label.text = "Registering..." # 显示注册中
+    status_label.text = "注册中..." # 显示注册中
     # 发送注册请求到服务器（ID 为 1 代表服务器）
     rpc_id(1, "register_user", usr_input.text, pwd_input.text, email_input.text)
 
@@ -70,10 +70,10 @@ func _on_register_pressed():
 func _on_login_pressed():
     # 检查是否已连接到服务器
     if multiplayer.multiplayer_peer.get_connection_status() != MultiplayerPeer.CONNECTION_CONNECTED:
-        status_label.text = "Error: Not connected to Godot Server!"
+        status_label.text = "错误: 未连接到服务器！"
         return
         
-    status_label.text = "Logging in..."  # 显示登录中
+    status_label.text = "登录中..."  # 显示登录中
     # 发送登录请求到服务器
     rpc_id(1, "login_user", usr_input.text, pwd_input.text)
     username = usr_input.text # 保存当前尝试登录的用户名
@@ -97,7 +97,7 @@ func auth_response(success: bool, msg: String):
         _update_chat_ui()
     else:
         # 登录失败，显示错误信息
-        status_label.text = "Failed: " + msg
+        status_label.text = "失败: " + msg
 
 # 点击发送消息按钮时的回调
 func _on_send_pressed():

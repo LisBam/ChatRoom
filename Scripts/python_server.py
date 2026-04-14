@@ -22,7 +22,7 @@ def get_db_connection():
         conn = mysql.connector.connect(**DB_CONFIG)
         return conn
     except mysql.connector.Error as err:
-        print(f"Error connecting to MySQL: {err}")
+        print(f"连接 MySQL 数据库失败: {err}")
         return None
 
 # 注册 API 接口
@@ -35,21 +35,21 @@ def register():
 
     conn = get_db_connection()
     if not conn:
-        return jsonify({'success': False, 'msg': 'Database connection error'}) # 数据库连接失败
+        return jsonify({'success': False, 'msg': '数据库连接错误'}) # 数据库连接失败
 
     cursor = conn.cursor()
     try:
         # 检查用户名或邮箱是否已存在
         cursor.execute("SELECT id FROM Users WHERE username = %s OR email = %s", (username, email))
         if cursor.fetchone():
-            return jsonify({'success': False, 'msg': 'Username or email already exists'}) # 已存在提示错误
+            return jsonify({'success': False, 'msg': '用户名或邮箱已存在'}) # 已存在提示错误
 
         # 将新用户数据插入数据库
         cursor.execute(
             "INSERT INTO Users (username, password_hash, email) VALUES (%s, %s, %s)",
             (username, password, email)
         )
-        return jsonify({'success': True, 'msg': 'User registered successfully'}) # 注册成功
+        return jsonify({'success': True, 'msg': '用户注册成功'}) # 注册成功
     except Exception as e:
         return jsonify({'success': False, 'msg': str(e)}) # 发生异常时返回错误信息
     finally:
@@ -65,7 +65,7 @@ def login():
 
     conn = get_db_connection()
     if not conn:
-        return jsonify({'success': False, 'msg': 'Database connection error'}) # 数据库连接失败
+        return jsonify({'success': False, 'msg': '数据库连接错误'}) # 数据库连接失败
 
     cursor = conn.cursor(dictionary=True)
     try:
@@ -73,9 +73,9 @@ def login():
         cursor.execute("SELECT id, username FROM Users WHERE username = %s AND password_hash = %s", (username, password))
         user = cursor.fetchone()
         if user:
-            return jsonify({'success': True, 'msg': 'Login successful', 'user_id': user['id']}) # 登录成功返回 user_id
+            return jsonify({'success': True, 'msg': '登录成功', 'user_id': user['id']}) # 登录成功返回 user_id
         else:
-            return jsonify({'success': False, 'msg': 'Invalid credentials'}) # 信息不匹配
+            return jsonify({'success': False, 'msg': '用户名或密码无效'}) # 信息不匹配
     except Exception as e:
         return jsonify({'success': False, 'msg': str(e)}) # 发生异常
     finally:
@@ -112,7 +112,7 @@ def save_message():
         
         # 确保发送者存在
         if not sender_id:
-            return jsonify({'success': False, 'msg': 'Sender not found'})
+            return jsonify({'success': False, 'msg': '未找到发送者'})
 
         # 将消息插入数据库
         cursor.execute(
