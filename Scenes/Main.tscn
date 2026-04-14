@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://cb37cbqfk2cye"]
+
+[ext_resource type="Script" uid="uid://bnshxgij5ub2v" path="res://Scripts/Main.gd" id="1_main"]
+
+[node name="Main" type="Control" unique_id=1425292146]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1794710186]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -100.0
+offset_top = -50.0
+offset_right = 100.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer" unique_id=1989472975]
+layout_mode = 2
+text = "Chat Room Application"
+horizontal_alignment = 1
+
+[node name="StartServer" type="Button" parent="VBoxContainer" unique_id=890017695]
+layout_mode = 2
+text = "Start Godot Server"
+
+[node name="StartClient" type="Button" parent="VBoxContainer" unique_id=863859957]
+layout_mode = 2
+text = "Start Chat Client"
+
+[connection signal="pressed" from="VBoxContainer/StartServer" to="." method="_on_start_server_pressed"]
+[connection signal="pressed" from="VBoxContainer/StartClient" to="." method="_on_start_client_pressed"]
