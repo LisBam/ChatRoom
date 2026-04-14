@@ -16,7 +16,7 @@ var online_count = 0 # 在线人数
 # 存储各种聊天历史，空字符串代表大厅
 var chat_histories = {"": ""} 
 var unread_channels = {} # 记录未读频道的字典，用于闪烁提示
-var contact_update_times = {"": 0.0, "AI": 0.0} # 记录频道最后更新时间
+var contact_update_times = {"": 0.0, "AI助手": 0.0} # 记录频道最后更新时间
 
 # 获取 UI 节点的引用
 @onready var login_panel = $LoginPanel # 登录面板
@@ -77,9 +77,27 @@ func _on_register_pressed():
 		status_label.text = "错误: 未连接到服务器！"
 		return
 	
+	var u_name = usr_input.text.strip_edges()
+	var pwd = pwd_input.text
+	var email = email_input.text.strip_edges()
+	
+	if u_name.length() < 5:
+		status_label.text = "注册失败: 用户名必须大于等于5个字"
+		return
+		
+	if pwd.length() < 6:
+		status_label.text = "注册失败: 密码必须大于等于6位数"
+		return
+		
+	var email_regex = RegEx.new()
+	email_regex.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+	if not email_regex.search(email):
+		status_label.text = "注册失败: 邮箱格式不正确"
+		return
+		
 	status_label.text = "注册中..." # 显示注册中
 	# 发送注册请求到服务器（ID 为 1 代表服务器）
-	rpc_id(1, "register_user", usr_input.text, pwd_input.text, email_input.text)
+	rpc_id(1, "register_user", u_name, pwd, email)
 
 # 点击登录按钮时的回调
 func _on_login_pressed():
@@ -90,14 +108,18 @@ func _on_login_pressed():
 		
 	status_label.text = "登录中..."  # 显示登录中
 	# 发送登录请求到服务器
-	rpc_id(1, "login_user", usr_input.text, pwd_input.text)
-	username = usr_input.text # 保存当前尝试登录的用户名
+	rpc_id(1, "login_user", usr_input.text.strip_edges(), pwd_input.text)
+	username = usr_input.text.strip_edges() # 保存当前尝试登录的用户名
 
 # 接收服务器发回的认证响应
 @rpc("any_peer", "call_remote")
 func auth_response(success: bool, msg: String):
 	print(msg)
 	if success:
+		if msg == "注册成功":
+			status_label.text = "注册成功，请登录"
+			return
+			
 		# 登录成功，隐藏登录面板，显示聊天面板
 		login_panel.visible = false
 		chat_panel.visible = true
@@ -105,9 +127,9 @@ func auth_response(success: bool, msg: String):
 		# 登录成功后，清除旧数据
 		contact_list.clear()
 		contact_list.add_item("公共大厅")
-		contact_list.add_item("AI") # 新增AI聊天
+		contact_list.add_item("AI助手") # 新增AI聊天
 		contact_list.select(0) # 默认选中第一项（公共大厅）
-		chat_histories = {"": "", "AI": ""}
+		chat_histories = {"": "", "AI助手": ""}
 		unread_channels.clear()
 		contact_update_times.clear()
 		current_receiver = ""
@@ -119,7 +141,12 @@ func auth_response(success: bool, msg: String):
 		timer.timeout.connect(_mark_all_as_read)
 	else:
 		# 登录失败，显示错误信息
-		status_label.text = "失败: " + msg
+		if msg == "用户名或邮箱已存在" or msg.contains("注册"):
+			status_label.text = "注册失败: " + msg
+		elif msg == "用户名或密码错误" or msg.contains("登录"):
+			status_label.text = "登录失败: " + msg
+		else:
+			status_label.text = "操作失败: " + msg
 
 # 点击发送消息按钮时的回调
 func _on_send_pressed():
@@ -132,7 +159,7 @@ func _on_send_pressed():
 		return
 		
 	# 处理与AI的聊天
-	if target == "AI":
+	if target == "AI助手":
 		var err = ai_chat_node.send_prompt(content)
 		if err == OK:
 			_append_chat_history(target, "[You]: " + content)
@@ -336,8 +363,8 @@ func _on_ai_responded(response_text: String):
 	regex.compile("(?s)<think>.*?</think>")
 	var clean_text = regex.sub(response_text, "")
 	clean_text = clean_text.strip_edges()
-	_append_chat_history("AI", "[AI]: " + clean_text)
+	_append_chat_history("AI助手", "[AI助手]: " + clean_text)
 	rpc_id(1, "save_ai_message", false, clean_text) # 上传AI回复的记录
 
 func _on_ai_error(error_msg: String):
-	_append_chat_history("AI", "[系统警告]: " + error_msg)
+	_append_chat_history("AI助手", "[系统警告]: " + error_msg)
