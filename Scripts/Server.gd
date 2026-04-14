@@ -2,7 +2,7 @@ extends Control
 
 # 服务器端脚本
 var peer = ENetMultiplayerPeer.new() # 创建一个 ENet 网络节点实例作为服务器
-var PORT = 8080 # 服务器监听的端口
+var PORT = 2310 # 服务器监听的端口
 var PYTHON_API_URL = "http://127.0.0.1:5000/api/" # 对应的 Python 后端 API 地址
 
 var connected_users = {} # 存储映射：client_id(客户端ID) : username(用户名)
