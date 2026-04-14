@@ -124,6 +124,17 @@ func send_message(content, type, target):
 			rpc_id(user_clients[target], "receive_message", sender_name, target, content, type, true)
 			rpc_id(sender_id, "update_status", "read") # 假设发过去以后算作已读
 
+@rpc("any_peer", "call_remote")
+func save_ai_message(is_user_to_ai: bool, content: String):
+	var sender_id = multiplayer.get_remote_sender_id()
+	if not connected_users.has(sender_id): return
+	var username = connected_users[sender_id]
+	
+	var sender = username if is_user_to_ai else "AI"
+	var receiver = "AI" if is_user_to_ai else username
+	
+	_send_http_request("save_message", {"sender": sender, "receiver": receiver, "content": content, "type": "text"})
+
 func _broadcast_online_count():
 	# 广播给所有已登录客户端
 	for client_id in connected_users.keys():
