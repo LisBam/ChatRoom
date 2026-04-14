@@ -117,11 +117,11 @@ theme_override_font_sizes/font_size = 20
 text = "公共大厅"
 horizontal_alignment = 1
 
-[node name="HistoryText" type="TextEdit" parent="ChatPanel/ChatLayout/ChatArea" unique_id=1208583161]
+[node name="HistoryText" type="RichTextLabel" parent="ChatPanel/ChatLayout/ChatArea" unique_id=1208583161]
 layout_mode = 2
 size_flags_vertical = 3
-editable = false
-wrap_mode = 1
+bbcode_enabled = true
+scroll_following = true
 
 [node name="InputLayout" type="HBoxContainer" parent="ChatPanel/ChatLayout/ChatArea" unique_id=838921243]
 layout_mode = 2
