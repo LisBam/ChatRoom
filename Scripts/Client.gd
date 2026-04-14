@@ -10,6 +10,7 @@ enum ChatMode { PUBLIC, PRIVATE }
 var current_mode = ChatMode.PUBLIC # 当前的聊天模式
 var current_receiver = "" # 当前私聊的接收者
 var username = "" # 当前用户的用户名
+var ai_chat_node # 用于和本地 AI 通信的重要节点
 
 # 存储各种聊天历史，空字符串代表大厅
 var chat_histories = {"": ""} 
@@ -29,6 +30,12 @@ var chat_histories = {"": ""}
 @onready var status_label = $LoginPanel/VBox/Label # 状态标签（显示登录/连接状态）
 
 func _ready():
+    # 挂载AI聊天节点
+    ai_chat_node = preload("res://Scripts/AIChat.gd").new()
+    add_child(ai_chat_node)
+    ai_chat_node.ai_responded.connect(_on_ai_responded)
+    ai_chat_node.ai_error.connect(_on_ai_error)
+
     # 初始状态隐藏聊天面板，显示登录面板
     chat_panel.visible = false
     login_panel.visible = true
@@ -95,8 +102,9 @@ func auth_response(success: bool, msg: String):
         # 登录成功后，清除旧数据
         contact_list.clear()
         contact_list.add_item("公共大厅")
+        contact_list.add_item("AI助手") # 新增AI聊天
         contact_list.select(0) # 默认选中第一项（公共大厅）
-        chat_histories = {"": ""}
+        chat_histories = {"": "", "AI助手": ""}
         current_receiver = ""
         current_mode = ChatMode.PUBLIC
         _update_chat_ui()
@@ -112,6 +120,16 @@ func _on_send_pressed():
     
     # 消息为空则不发送
     if content.strip_edges() == "":
+        return
+        
+    # 处理与AI的聊天
+    if target == "AI助手":
+        var err = ai_chat_node.send_prompt(content)
+        if err == OK:
+            _append_chat_history(target, "[You]: " + content)
+        message_input.clear()
+        message_input.caret_column = 0
+        message_input.call_deferred("grab_focus")
         return
     
     # 如果目标为空，则发送公开消息，否则发送私聊消息
@@ -223,3 +241,13 @@ func update_status(status: String):
 @rpc("any_peer", "call_remote") func register_user(_u, _p, _e): pass # 注册方法
 @rpc("any_peer", "call_remote") func login_user(_u, _p): pass # 登录方法
 @rpc("any_peer", "call_remote") func send_message(_c, _t, _tg): pass # 发送消息方法
+
+# --- AI 回调 ---
+func _on_ai_responded(response_text: String):
+    var regex = RegEx.new()
+    regex.compile("(?s)<think>.*?</think>")
+    var clean_text = regex.sub(response_text, "")
+    _append_chat_history("AI助手", "[DeepSeek]: " + clean_text.strip_edges())
+
+func _on_ai_error(error_msg: String):
+    _append_chat_history("AI助手", "[系统警告]: " + error_msg)
