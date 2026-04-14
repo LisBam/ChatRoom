@@ -11,12 +11,17 @@ var current_mode = ChatMode.PUBLIC # 当前的聊天模式
 var current_receiver = "" # 当前私聊的接收者
 var username = "" # 当前用户的用户名
 
+# 存储各种聊天历史，空字符串代表大厅
+var chat_histories = {"": ""} 
+
 # 获取 UI 节点的引用
 @onready var login_panel = $LoginPanel # 登录面板
 @onready var chat_panel = $ChatPanel # 聊天面板
-@onready var chat_history = $ChatPanel/VBoxContainer/HistoryText # 聊天记录文本框
-@onready var message_input = $ChatPanel/VBoxContainer/HBoxContainer/MessageInput # 消息输入框
-@onready var target_input = $ChatPanel/VBoxContainer/HBoxContainer/TargetInput # 目标用户输入框（用于私聊）
+@onready var contact_list = $ChatPanel/ChatLayout/Sidebar/ContactList # 联系人列表
+@onready var new_contact_input = $ChatPanel/ChatLayout/Sidebar/AddContactBox/NewContactInput # 新联系人输入框
+@onready var current_chat_label = $ChatPanel/ChatLayout/ChatArea/CurrentChatLabel # 当前聊天频道名称
+@onready var chat_history = $ChatPanel/ChatLayout/ChatArea/HistoryText # 聊天记录文本框
+@onready var message_input = $ChatPanel/ChatLayout/ChatArea/InputLayout/MessageInput # 消息输入框
 @onready var usr_input = $LoginPanel/VBox/UserInput # 用户名输入框
 @onready var pwd_input = $LoginPanel/VBox/PwdInput # 密码输入框
 @onready var email_input = $LoginPanel/VBox/EmailInput # 邮箱输入框
@@ -81,6 +86,15 @@ func auth_response(success: bool, msg: String):
         # 登录成功，隐藏登录面板，显示聊天面板
         login_panel.visible = false
         chat_panel.visible = true
+        
+        # 登录成功后，清除旧数据
+        contact_list.clear()
+        contact_list.add_item("公共大厅")
+        contact_list.select(0) # 默认选中第一项（公共大厅）
+        chat_histories = {"": ""}
+        current_receiver = ""
+        current_mode = ChatMode.PUBLIC
+        _update_chat_ui()
     else:
         # 登录失败，显示错误信息
         status_label.text = "Failed: " + msg
@@ -89,7 +103,7 @@ func auth_response(success: bool, msg: String):
 func _on_send_pressed():
     var type = "text" # 消息类型为普通文本
     var content = message_input.text # 获取输入的消息内容
-    var target = target_input.text # 获取输入的目标用户名
+    var target = current_receiver # 当前选中的对象
     
     # 消息为空则不发送
     if content.strip_edges() == "":
@@ -104,7 +118,7 @@ func _on_send_pressed():
         rpc_id(1, "send_message", content, type, target) # 向服务器发送私聊消息请求
     
     # 在本地聊天记录中追加自己发送的消息
-    chat_history.text += "[You]: " + content + "\n"
+    _append_chat_history(target, "[You]: " + content)
     message_input.text = "" # 清空输入框
 
 # 输入框按下回车时的回调
@@ -113,11 +127,82 @@ func _on_message_input_text_submitted(_new_text: String):
 
 # 接收别人发来的消息
 @rpc("any_peer", "call_remote")
-func receive_message(sender: String, content: String, type: String, is_private: bool):
-    # 根据是否是私聊，添加不同的前缀
-    var prefix = "[Private from " + sender + "]: " if is_private else "[" + sender + "]: "
-    # 把消息追加到聊天记录文本里
-    chat_history.text += prefix + content + "\n"
+func receive_message(sender: String, receiver: String, content: String, type: String, is_private: bool):
+    # 如果是公聊，把它放在公共大厅；
+    # 如果是私聊，需判断这个消息是我发给别人的，还是别人发给我的，以此来决定将它放在哪个联系人的历史里
+    var target_channel = ""
+    if is_private:
+        # 如果发送者是我自己，说明这是从历史记录拉取出来的我发给别人的消息
+        if sender == username:
+            target_channel = receiver # 发给别人，放在别人的聊天窗口
+        else:
+            target_channel = sender # 别人发给我，放在别人的聊天窗口
+            
+    # 统一前缀格式为 [名字]: ，不再区分公屏还是私聊
+    var prefix = "[" + sender + "]: "
+    
+    # 如果是我发出的话（比如加载历史记录时），统一显示 [You]: 
+    if sender == username:
+        prefix = "[You]: "
+    
+    # 将消息追加到对应聊天记录
+    _append_chat_history(target_channel, prefix + content)
+
+# 封装好的添加聊天记录函数
+func _append_chat_history(channel: String, text: String):
+    # 判断该联系人是否已在我方列表内
+    if not chat_histories.has(channel):
+        chat_histories[channel] = ""
+        if channel != "":
+            contact_list.add_item(channel)
+    
+    # 拼接文本
+    if chat_histories[channel] != "":
+        chat_histories[channel] += "\n"
+    chat_histories[channel] += text
+    
+    # 若正好是当前停留的窗口，顺便刷新 UI 文本框
+    if current_receiver == channel:
+        chat_history.text = chat_histories[channel]
+        chat_history.scroll_vertical = chat_history.get_line_count()
+
+# 联系人被选中时的回调
+func _on_contact_selected(index: int):
+    # index 0 固定为“公共大厅”
+    if index == 0:
+        current_receiver = ""
+        current_mode = ChatMode.PUBLIC
+        current_chat_label.text = "公共大厅" # 更新聊天界面的标题
+    else:
+        current_receiver = contact_list.get_item_text(index)
+        current_mode = ChatMode.PRIVATE
+        current_chat_label.text = "与 " + current_receiver + " 私聊中" # 提示当前处于私聊
+    
+    # 刷新聊天区显示的内容
+    _update_chat_ui()
+
+# 更新聊天区域显示
+func _update_chat_ui():
+    # 如果没有该联系人的聊天记录，初始化为空
+    if not chat_histories.has(current_receiver):
+        chat_histories[current_receiver] = ""
+        
+    chat_history.text = chat_histories[current_receiver] # 将记录文本显示在UI上
+    chat_history.scroll_vertical = chat_history.get_line_count() # 滚动到最底部
+
+# 点击添加联系人按钮
+func _on_add_contact_pressed():
+    var new_contact = new_contact_input.text.strip_edges() # 去除前后多余空格
+    
+    # 防止空内容或添加自己为联系人
+    if new_contact == "" or new_contact == username:
+        return
+    
+    # 如果列表里还没有这个人，将其加入联系人列表
+    if not chat_histories.has(new_contact):
+        chat_histories[new_contact] = ""
+        contact_list.add_item(new_contact)
+        new_contact_input.text = "" # 添加后清空输入框
 
 # 接收来自服务器的消息状态更新（例如：delivered）
 @rpc("any_peer", "call_remote")

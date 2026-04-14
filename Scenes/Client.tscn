@@ -74,7 +74,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="ChatPanel" unique_id=642723402]
+[node name="ChatLayout" type="HBoxContainer" parent="ChatPanel" unique_id=317164890]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -86,30 +86,57 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="HistoryText" type="TextEdit" parent="ChatPanel/VBoxContainer" unique_id=168680882]
+[node name="Sidebar" type="VBoxContainer" parent="ChatPanel/ChatLayout" unique_id=890007172]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+
+[node name="ContactList" type="ItemList" parent="ChatPanel/ChatLayout/Sidebar" unique_id=18420880]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AddContactBox" type="HBoxContainer" parent="ChatPanel/ChatLayout/Sidebar" unique_id=41886113]
+layout_mode = 2
+
+[node name="NewContactInput" type="LineEdit" parent="ChatPanel/ChatLayout/Sidebar/AddContactBox" unique_id=498271059]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "添加联系人..."
+
+[node name="AddContactBtn" type="Button" parent="ChatPanel/ChatLayout/Sidebar/AddContactBox" unique_id=800062642]
+layout_mode = 2
+text = "+"
+
+[node name="ChatArea" type="VBoxContainer" parent="ChatPanel/ChatLayout" unique_id=1385246214]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CurrentChatLabel" type="Label" parent="ChatPanel/ChatLayout/ChatArea" unique_id=1434700021]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "公共大厅"
+horizontal_alignment = 1
+
+[node name="HistoryText" type="TextEdit" parent="ChatPanel/ChatLayout/ChatArea" unique_id=1208583161]
 layout_mode = 2
 size_flags_vertical = 3
 editable = false
 wrap_mode = 1
 
-[node name="HBoxContainer" type="HBoxContainer" parent="ChatPanel/VBoxContainer" unique_id=571990350]
+[node name="InputLayout" type="HBoxContainer" parent="ChatPanel/ChatLayout/ChatArea" unique_id=838921243]
 layout_mode = 2
 
-[node name="TargetInput" type="LineEdit" parent="ChatPanel/VBoxContainer/HBoxContainer" unique_id=1401142922]
+[node name="MessageInput" type="LineEdit" parent="ChatPanel/ChatLayout/ChatArea/InputLayout" unique_id=98539092]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.3
-placeholder_text = "Private to... (Empty = All)"
+placeholder_text = "输入消息..."
 
-[node name="MessageInput" type="LineEdit" parent="ChatPanel/VBoxContainer/HBoxContainer" unique_id=1504437435]
+[node name="SendBtn" type="Button" parent="ChatPanel/ChatLayout/ChatArea/InputLayout" unique_id=1902942884]
 layout_mode = 2
-size_flags_horizontal = 3
-placeholder_text = "Enter a message..."
-
-[node name="SendBtn" type="Button" parent="ChatPanel/VBoxContainer/HBoxContainer" unique_id=1202375703]
-layout_mode = 2
-text = "Send"
+text = "发送"
 
 [connection signal="pressed" from="LoginPanel/VBox/LoginBtn" to="." method="_on_login_pressed"]
 [connection signal="pressed" from="LoginPanel/VBox/RegisterBtn" to="." method="_on_register_pressed"]
-[connection signal="pressed" from="ChatPanel/VBoxContainer/HBoxContainer/SendBtn" to="." method="_on_send_pressed"]
+[connection signal="item_selected" from="ChatPanel/ChatLayout/Sidebar/ContactList" to="." method="_on_contact_selected"]
+[connection signal="pressed" from="ChatPanel/ChatLayout/Sidebar/AddContactBox/AddContactBtn" to="." method="_on_add_contact_pressed"]
+[connection signal="pressed" from="ChatPanel/ChatLayout/ChatArea/InputLayout/SendBtn" to="." method="_on_send_pressed"]
