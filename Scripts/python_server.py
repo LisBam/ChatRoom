@@ -10,8 +10,10 @@ app = Flask(__name__)
 # Database configuration (adjust user and password to your local MySQL settings)
 DB_CONFIG = {
     'host': '127.0.0.1', # 数据库主机地址
-    'user': 'root',      # 数据库用户名
-    'password': 'zlm258078', # 在这里填入你的 MySQL 密码
+    #'user': 'root',      # 数据库用户名
+    'user': 'lisbam',      # 数据库用户名
+    'password': 'CHENyt&jll@061202', # 在这里填入你的 MySQL 密码
+    #'password': 'zlm258078', # 在这里填入你的 MySQL 密码
     'database': 'chat_room', # 数据库名称
     'autocommit': True       # 启用自动提交
 }
