@@ -3,7 +3,8 @@ extends Control
 # 客户端脚本，用于处理登录、注册和聊天界面
 var peer = ENetMultiplayerPeer.new() # 创建一个 ENet 网络节点实例
 var PORT = 2310 # 服务器端口
-var IP_ADDRESS = "127.0.0.1" # 服务器的 IP 地址
+var IP_ADDRESS = "115.190.24.116" # 服务器的 IP 地址
+#var IP_ADDRESS = "127.0.0.1" # IP 地址
 
 # 定义聊天模式枚举：公开和私聊
 enum ChatMode { PUBLIC, PRIVATE }
