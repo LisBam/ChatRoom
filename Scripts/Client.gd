@@ -1,18 +1,17 @@
 extends Control
 
 # 客户端脚本，用于处理登录、注册和聊天界面
-var peer = ENetMultiplayerPeer.new() # 创建一个 ENet 网络节点实例
-var PORT = 2310 # 服务器端口
-var IP_ADDRESS = "115.190.24.116" # 服务器的 IP 地址
+var peer = ENetMultiplayerPeer.new() # ENet 网络节点实例
+var PORT = 2310
+var IP_ADDRESS = "115.190.24.116"
 #var IP_ADDRESS = "127.0.0.1" # IP 地址
 
-# 定义聊天模式枚举：公开和私聊
-enum ChatMode { PUBLIC, PRIVATE }
-var current_mode = ChatMode.PUBLIC # 当前的聊天模式
-var current_receiver = "" # 当前私聊的接收者
-var username = "" # 当前用户的用户名
-var ai_chat_node # 用于和本地 AI 通信的重要节点
-var online_count = 0 # 在线人数
+enum ChatMode { PUBLIC, PRIVATE } # 定义聊天模式枚举：公开和私聊
+var current_mode = ChatMode.PUBLIC
+var current_receiver = "" 
+var username = ""
+var ai_chat_node 
+var online_count = 0
 
 # 存储各种聊天历史，空字符串代表大厅
 var chat_histories = {"": ""} 
@@ -40,7 +39,6 @@ func _ready():
 	ai_chat_node.ai_responded.connect(_on_ai_responded)
 	ai_chat_node.ai_error.connect(_on_ai_error)
 
-	# 初始状态隐藏聊天面板，显示登录面板
 	chat_panel.visible = false
 	login_panel.visible = true
 	
@@ -114,10 +112,10 @@ func _on_login_pressed():
 		status_label.text = "错误: 未连接到服务器！"
 		return
 		
-	status_label.text = "登录中..."  # 显示登录中
+	status_label.text = "登录中..."
 	# 发送登录请求到服务器
 	rpc_id(1, "login_user", login_user_name, login_pwd)
-	username = login_user_name # 保存当前尝试登录的用户名
+	username = login_user_name
 
 # 接收服务器发回的认证响应
 @rpc("any_peer", "call_remote")
@@ -128,14 +126,12 @@ func auth_response(success: bool, msg: String):
 			status_label.text = "注册成功，请登录"
 			return
 			
-		# 登录成功，隐藏登录面板，显示聊天面板
 		login_panel.visible = false
 		chat_panel.visible = true
 		
-		# 登录成功后，清除旧数据
 		contact_list.clear()
 		contact_list.add_item("公共大厅")
-		contact_list.add_item("AI助手") # 新增AI聊天
+		contact_list.add_item("AI助手")
 		contact_list.select(0) # 默认选中第一项（公共大厅）
 		chat_histories = {"": "", "AI助手": ""}
 		unread_channels.clear()
@@ -144,7 +140,7 @@ func auth_response(success: bool, msg: String):
 		current_mode = ChatMode.PUBLIC
 		_update_chat_ui()
 		
-		# 启动一个定时器，在稍微延迟后把所有频道标记为已读（模拟全都点一遍）
+		# 补丁：把所有频道标记为已读
 		var timer = get_tree().create_timer(0.1)
 		timer.timeout.connect(_mark_all_as_read)
 	else:
@@ -158,50 +154,43 @@ func auth_response(success: bool, msg: String):
 
 # 点击发送消息按钮时的回调
 func _on_send_pressed():
-	var type = "text" # 消息类型为普通文本
-	var content = message_input.text # 获取输入的消息内容
-	var target = current_receiver # 当前选中的对象
+	var type = "text"
+	var content = message_input.text 
+	var target = current_receiver 
 	
-	# 消息为空则不发送
 	if content.strip_edges() == "":
 		return
 		
-	# 处理与AI的聊天
 	if target == "AI助手":
 		var err = ai_chat_node.send_prompt(content)
 		if err == OK:
 			_append_chat_history(target, "[You]: " + content)
-			rpc_id(1, "save_ai_message", true, content) # 上传发给AI的消息记录
+			rpc_id(1, "save_ai_message", true, content)
 		message_input.clear()
 		message_input.caret_column = 0
 		message_input.call_deferred("grab_focus")
 		return
 	
-	# 如果目标为空，则发送公开消息，否则发送私聊消息
 	if target == "":
 		current_mode = ChatMode.PUBLIC
-		rpc_id(1, "send_message", content, type, "") # 向服务器发送广播消息
+		rpc_id(1, "send_message", content, type, "")
 	else:
 		current_mode = ChatMode.PRIVATE
-		rpc_id(1, "send_message", content, type, target) # 向服务器发送私聊消息请求
+		rpc_id(1, "send_message", content, type, target)
 	
-	# 在本地聊天记录中追加自己发送的消息
 	_append_chat_history(target, "[You]: " + content)
-	message_input.clear() # 清空输入框并重置内部编辑状态
+	message_input.clear()
 	message_input.caret_column = 0
-	# 延迟到当前 UI 事件结束后恢复可输入焦点
 	message_input.call_deferred("grab_focus")
 
 # 输入框按下回车时的回调
 func _on_message_input_text_submitted(_new_text: String):
-	# 延迟调用，避免与 LineEdit 的提交事件同帧冲突
+	# 延迟调用
 	call_deferred("_on_send_pressed")
 
 # 接收别人发来的消息
 @rpc("any_peer", "call_remote")
 func receive_message(sender: String, receiver: String, content: String, type: String, is_private: bool):
-	# 如果是公聊，把它放在公共大厅；
-	# 如果是私聊，需判断这个消息是我发给别人的，还是别人发给我的，以此来决定将它放在哪个联系人的历史里
 	var target_channel = ""
 	if is_private:
 		# 如果发送者是我自己，说明这是从历史记录拉取出来的我发给别人的消息
@@ -226,7 +215,6 @@ func receive_message(sender: String, receiver: String, content: String, type: St
 
 # 封装好的添加聊天记录函数
 func _append_chat_history(channel: String, text: String):
-	# 判断该联系人是否已在我方列表内
 	if not chat_histories.has(channel):
 		chat_histories[channel] = ""
 		if channel != "":
@@ -250,7 +238,7 @@ func _append_chat_history(channel: String, text: String):
 	# 收到消息后重新排序联系人列表
 	_sort_contact_list()
 
-# 对联系人列表排序（按最后消息时间倒序，新获取消息的排在前面）
+# 对联系人列表排序
 func _sort_contact_list():
 	var items = []
 	for i in range(contact_list.item_count):
@@ -266,7 +254,6 @@ func _sort_contact_list():
 	for item in items:
 		contact_list.add_item(item["name"])
 		if unread_channels.has(item["real_name"]) and unread_channels[item["real_name"]]:
-			# 如果是未读消息，可以初始化其颜色
 			pass
 	
 	# 重新选中当前正在聊天的频道
@@ -277,14 +264,13 @@ func _sort_contact_list():
 			break
 
 func _process(_delta):
-	# 实现未读消息频道的文本闪烁效果
 	if contact_list == null or contact_list.item_count == 0:
 		return
 		
 	var time_val = sin(Time.get_ticks_msec() / 150.0) # -1 到 1 之间
-	var blink_color = Color(1, 0.5, 0) # 橙色作为提示色
+	var blink_color = Color(1, 0.5, 0)
 	if time_val > 0:
-		blink_color = Color(1, 0.8, 0.2) # 闪烁变化
+		blink_color = Color(1, 0.8, 0.2)
 		
 	for i in range(contact_list.item_count):
 		var c_name = contact_list.get_item_text(i)
@@ -314,7 +300,7 @@ func _on_contact_selected(index: int):
 	# 刷新聊天区显示的内容
 	_update_chat_ui()
 
-# 标记所有频道为已读（模拟把所有窗口点了一遍）
+# 标记所有频道为已读
 func _mark_all_as_read():
 	for channel in chat_histories.keys():
 		unread_channels[channel] = false
@@ -336,17 +322,15 @@ func _update_chat_ui():
 func _on_add_contact_pressed():
 	var new_contact = new_contact_input.text.strip_edges() # 去除前后多余空格
 	
-	# 防止空内容或添加自己为联系人
 	if new_contact == "" or new_contact == username:
 		return
 	
-	# 如果列表里还没有这个人，将其加入联系人列表
 	if not chat_histories.has(new_contact):
 		chat_histories[new_contact] = ""
 		contact_update_times[new_contact] = Time.get_unix_time_from_system()
 		contact_list.add_item(new_contact)
 		_sort_contact_list()
-		new_contact_input.text = "" # 添加后清空输入框
+		new_contact_input.text = ""
 
 # 接收来自服务器的消息状态更新（例如：delivered）
 @rpc("any_peer", "call_remote")
