@@ -2,9 +2,10 @@ extends Control
 
 # 服务器端脚本
 var peer = ENetMultiplayerPeer.new() # 创建一个 ENet 网络节点实例作为服务器
-var PORT = 2310 # 服务器监听的端口
+var PORT = 2310
 var PYTHON_API_URL = "http://127.0.0.1:5000/api/" # 对应的 Python 后端 API 地址
 
+# 空间换时间！
 var connected_users = {} # 存储映射：client_id(客户端ID) : username(用户名)
 var user_clients = {}    # 存储映射：username(用户名) : client_id(客户端ID)
 
@@ -33,12 +34,11 @@ func _send_http_request(endpoint: String, payload: Dictionary) -> Dictionary:
 	http_request.queue_free() # 释放 HTTP 请求节点
 	
 	if response_code == 200:
-		# 如果返回 200，则解析返回的 JSON 数据
 		var json_response = JSON.parse_string(body.get_string_from_utf8())
 		if typeof(json_response) == TYPE_DICTIONARY:
 			return json_response
 	
-	return {"success": false, "msg": "HTTP request failed"} # 如果失败返回默认错误信息
+	return {"success": false, "msg": "HTTP request failed"}
 
 
 # 当有客户端连接时回调
@@ -97,7 +97,7 @@ func login_user(username, password):
 				# 把 sender 和 receiver 都传过去，方便客户端正确归类历史信息
 				rpc_id(client_id, "receive_message", msg.sender, msg.receiver, msg.content, msg.type, is_private)
 
-		# 广播加入消息（在历史记录之后发送，确保排在最下方）
+		# 广播加入消息
 		for client in connected_users.keys():
 			rpc_id(client, "receive_message", "System", "", username + " 加入了聊天室", "system", false)
 	else:

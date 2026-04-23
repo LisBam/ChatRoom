@@ -4,7 +4,7 @@ var theme_applied = {}
 var timer: Timer
 
 func _ready():
-    # 立即应用主题，避免闪烁
+    # 立即应用主题
     _apply_theme()
     
     # 监听后续动态添加的节点
