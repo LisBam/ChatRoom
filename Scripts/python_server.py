@@ -1,7 +1,10 @@
-﻿import os
+import os
 from flask import Flask, request, jsonify
 import mysql.connector
 from datetime import datetime
+
+# 数据库密码环境变量名；在服务启动前配置，保持连接参数字典的既有接口。
+DB_PASSWORD_ENVIRONMENT_VARIABLE = "CHATROOM_DB_PASSWORD"
 
 # 初始化 Flask 应用
 app = Flask(__name__)
@@ -12,14 +15,19 @@ DB_CONFIG = {
     'host': '127.0.0.1', # 数据库主机地址
     #'user': 'root',      # 数据库用户名
     'user': 'lisbam',      # 数据库用户名
-    'password': '', # 在这里填入你的 MySQL 密码
-    #'password': '', # 在这里填入你的 MySQL 密码
+    # 实际值仅从本机环境读取；下方原有提示标识密码配置项，不要在源码填写真实密码。
+    'password': os.environ.get(DB_PASSWORD_ENVIRONMENT_VARIABLE, ''), # 在这里填入你的 MySQL 密码
+    # 数据库密码不保留源码示例，部署时设置 CHATROOM_DB_PASSWORD。
     'database': 'chat_room', # 数据库名称
     'autocommit': True       # 启用自动提交
 }
 
 # 获取数据库连接的辅助函数
 def get_db_connection():
+    # 未配置密码时维持原有 None 失败返回约定，同时阻止尝试空凭据连接数据库。
+    if not DB_CONFIG['password']:
+        print(f"未设置环境变量 {DB_PASSWORD_ENVIRONMENT_VARIABLE}，无法连接 MySQL 数据库。")
+        return None
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         return conn
